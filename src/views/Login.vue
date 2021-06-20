@@ -17,6 +17,7 @@
           class="user-layout-login"
           ref="formLogin"
           :form="form"
+          @submit="handleSubmit"
         >
           <a-tabs
             activeKey="tab1"
@@ -93,6 +94,9 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import user from '@/apis/user'
+console.log(user)
 export default {
   components: {},
   data() {
@@ -101,7 +105,25 @@ export default {
     };
   },
   created() {},
-  methods: {},
+  methods: {
+    ...mapActions([ 'setUser' ]),
+    handleSubmit(e) {
+      e.preventDefault();
+      const validateFieldsKey = ['username', 'password']
+      this.form.validateFields(validateFieldsKey, { force: true }, async (err, values) => {
+        console.log('err', err)
+        if (!err) {
+          console.log('login form', values)
+          const params = {
+            user_name: values.username,
+            password: values.password,
+          }
+          const res = await user.login(params);
+          console.log(res)
+        }
+      })
+    }
+  },
 };
 </script>
 
