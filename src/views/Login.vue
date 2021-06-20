@@ -99,7 +99,6 @@
 import { mapActions } from 'vuex'
 import storage from 'store'
 import user from '@/apis/user'
-console.log(user)
 export default {
   components: {},
   data() {
@@ -123,10 +122,9 @@ export default {
             user_name: values.username,
             password: values.password,
           }
-          const { data: res } = await user.login(params);
-
-          if (res.code == 200 && res.data) {
-            const { user, token } = res.data;
+          const { data } = await user.login(params);
+          if (data) {
+            const { user, token } = data;
             const userInfo = {
               token,
               name: user.user_name,
@@ -134,7 +132,7 @@ export default {
             }
             storage.set('ACCESS_TOKEN', token, 7 * 24 * 60 * 60 * 1000)
             this.setUser(userInfo);
-            this.getPermissionlist();
+            await this.getPermissionlist()
             this.loginSuccess(userInfo)
           } else {
             setTimeout(() => {

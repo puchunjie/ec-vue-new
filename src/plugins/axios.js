@@ -36,9 +36,9 @@ _axios.interceptors.request.use(
 // Add a response interceptor
 _axios.interceptors.response.use(
   function(response) {
-    console.log(response)
+    // console.log(response)
     if (response.data.code == 400) {
-        console.log("错误", response)
+        // console.log("错误", response)
         notification.error({
             // eslint-disable-next-line no-unused-vars
             message: h => (
@@ -48,7 +48,7 @@ _axios.interceptors.response.use(
             ),
             description: ''
         });
-        return response
+        return response.data
     }
     if (response.data.code == 10001) {                
         store.dispatch('logOut').then(() => {
@@ -57,8 +57,11 @@ _axios.interceptors.response.use(
             }, 1500)
           })   
     }
+    if (response.data.code == 200) {
+      return response.data;
+    }
     // Do something with response data
-    return response;
+    return response.data;
   },
   function(error) {
     // Do something with response error

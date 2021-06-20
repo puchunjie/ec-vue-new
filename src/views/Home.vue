@@ -3,23 +3,11 @@
     <a-layout-sider v-model="collapsed" :trigger="null" :width="256" collapsible>
       <div class="logo" >意施精准塑形普拉提</div>
       <a-menu theme="dark" mode="inline" :default-selected-keys="['1']">
-        <a-sub-menu key="sub1">
-          <span slot="title"
-            ><a-icon type="setting" /><span>Navigation Four</span></span
-          >
-          <a-menu-item key="1"> Option 7 </a-menu-item>
-          <a-menu-item key="2"> Option 8 </a-menu-item>
-          <a-menu-item key="3"> Option 9 </a-menu-item>
-          <a-menu-item key="5"> Option 10 </a-menu-item>
-        </a-sub-menu>
-        <a-sub-menu key="sub2">
-          <span slot="title"
-            ><a-icon type="setting" /><span>Navigation Four</span></span
-          >
-          <a-menu-item key="7"> Option 7 </a-menu-item>
-          <a-menu-item key="8"> Option 8 </a-menu-item>
-          <a-menu-item key="9"> Option 9 </a-menu-item>
-          <a-menu-item key="10"> Option 10 </a-menu-item>
+        <a-sub-menu :key="group.id" v-for="group in menus">
+          <span slot="title"><i class="in-icon" :class="group.icon"/><span>{{ group.title }}</span></span>
+          <a-menu-item v-for="subMenu in group.children" :key="subMenu.subMenu" @click="menuClick(subMenu)">
+            <i class="in-icon" :class="subMenu.icon"/><span>{{ subMenu.title }}</span>
+          </a-menu-item>
         </a-sub-menu>
       </a-menu>
     </a-layout-sider>
@@ -45,12 +33,21 @@
   </a-layout>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
       collapsed: false,
     };
   },
+  computed: {
+    ...mapGetters(['menus'])
+  },
+  methods: {
+    menuClick(subMenu) {
+      console.log(subMenu)
+    }
+  }
 };
 </script>
 <style lang="less">
@@ -73,6 +70,10 @@ export default {
     line-height: 32px;
     overflow: hidden;
     padding: 0 5px;
+  }
+
+  .in-icon {
+    margin-right: 10px;
   }
 }
 </style>

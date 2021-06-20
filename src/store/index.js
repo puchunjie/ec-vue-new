@@ -12,26 +12,44 @@ export default new Vuex.Store({
       token: '',
       name: '',
       avatar: '',
-      roles: []
+      authPaths: [],
+      hasFech: false
+    },
+    menus: []
+  },
+  getters: {
+    authPaths(state) {
+      return state.user.authPaths
+    },
+    hasFech(state) {
+      return state.user.hasFech
+    },
+    menus(state) {
+      return state.menus 
     }
   },
   mutations: {
     'SET_USER_INFO': (state, userInfo) => {
-      const { name, avatar, roles, token } = userInfo; 
-      state.user.token = token || '';
-      state.user.name = name || '';
-      state.user.avatar = avatar || '';
-      state.user.roles = roles || [];
+      const { name, avatar, token } = userInfo
+      state.user.token = token || ''
+      state.user.name = name || ''
+      state.user.avatar = avatar || ''
     },
     'CLEAR_USER_INFO': (state) => {
-      state.user.token = '';
-      state.user.name = '';
-      state.user.avatar = '';
-      state.user.roles = [];
+      state.user.token = ''
+      state.user.name = ''
+      state.user.avatar = ''
+      state.user.authPaths = []
+      state.user.hasFech = false
+      state.menus = []
       storage.remove('ACCESS_TOKEN')
+      storage.remove('MENUS')
     },
-    'SET_ROLES': (state, roles) => {
-      console.log(state, roles)
+    'SET_ROLES': (state, paths) => {
+      state.user.authPaths = paths
+      state.user.hasFech = true
+      state.menus = paths
+      console.log(state, paths)
     }
   },
   actions: {
@@ -42,9 +60,17 @@ export default new Vuex.Store({
       commit('CLEAR_USER_INFO')
     },
     getPermissionlist({ commit }) {
-      user.getPermissionlist().then(res => {
-        console.log(res)
-        commit('SET_ROLES')
+      return user.getPermissionlist().then(({ data }) => {
+        console.log(data)
+        if (data) {
+          commit('SET_ROLES', data)
+          storage.remove('MENUS')
+          return true
+        } else {
+          commit('SET_ROLES', [])
+          storage.set('MENUS', data)
+          return false
+        }
       })
     }
   }
