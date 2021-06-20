@@ -75,6 +75,8 @@
               type="primary"
               htmlType="submit"
               class="login-button"
+              :loading="loginBtn"
+              :disabled="loginBtn"
               >确定</a-button
             >
           </a-form-item>
@@ -95,20 +97,23 @@
 
 <script>
 import { mapActions } from 'vuex'
+import storage from 'store'
 import user from '@/apis/user'
 console.log(user)
 export default {
   components: {},
   data() {
     return {
+      loginBtn: false,
       form: this.$form.createForm(this),
     };
   },
   created() {},
   methods: {
-    ...mapActions([ 'setUser' ]),
+    ...mapActions([ 'setUser', 'getPermissionlist' ]),
     handleSubmit(e) {
       e.preventDefault();
+      this.loginBtn = true
       const validateFieldsKey = ['username', 'password']
       this.form.validateFields(validateFieldsKey, { force: true }, async (err, values) => {
         console.log('err', err)
@@ -118,10 +123,36 @@ export default {
             user_name: values.username,
             password: values.password,
           }
-          const res = await user.login(params);
-          console.log(res)
+          const { data: res } = await user.login(params);
+
+          if (res.code == 200 && res.data) {
+            const { user, token } = res.data;
+            const userInfo = {
+              token,
+              name: user.user_name,
+              avatar: user.head_img
+            }
+            storage.set('ACCESS_TOKEN', token, 7 * 24 * 60 * 60 * 1000)
+            this.setUser(userInfo);
+            this.getPermissionlist();
+            this.loginSuccess(userInfo)
+          } else {
+            setTimeout(() => {
+              this.loginBtn = false 
+            }, 600)
+          }
         }
       })
+    },
+    loginSuccess(userInfo = {}) {
+      this.$router.replace({ path: '/' })
+      // 延迟 1 秒显示欢迎信息
+      setTimeout(() => {
+        this.$notification.success({
+          message: '欢迎',
+          description: `${userInfo.name}，欢迎回来`,
+        })
+      }, 1000)
     }
   },
 };
